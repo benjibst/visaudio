@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "name": "visaudio",
+            "includePath": [
+                "B:\\Git-repos\\raylib\\include"
+            ],
+            "intelliSenseMode": "windows-msvc-x64",
+            "compilerPath": "B:\\Programme\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\Hostx86\\x86\\cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

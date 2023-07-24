@@ -16,6 +16,6 @@ typedef struct {
 } RingBuffer;
 
 int allocate_ringbuffer(RingBuffer* buf,size_t n_elements, size_t element_size);
-int ringbuffer_push_back(RingBuffer* buf, void* data,size_t n_elements,size_t jmp);
+void ringbuffer_push_back(RingBuffer* buf, void* data,size_t n_elements,size_t jmp);
 
 #endif // __RINGBUFFER_H__
