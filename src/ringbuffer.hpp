@@ -7,15 +7,14 @@
 #include <stdio.h>
 
 typedef struct {
-    void *base;
-    size_t element_size;
+    size_t size_bytes;
     size_t n_elements;
-    size_t sz_total;
-    void* end;
-    void* curr_start;
+    float *base;
+    float *end;
+    float *curr;
 } RingBuffer;
 
-int allocate_ringbuffer(RingBuffer* buf,size_t n_elements, size_t element_size);
-void ringbuffer_push_back(RingBuffer* buf, void* data,size_t n_elements,size_t jmp);
+int allocate_ringbuffer(RingBuffer* buf,size_t n_elements);
+void ringbuffer_push_back(RingBuffer* buf, float* data,size_t n_elements,size_t interleaved);
 
 #endif // __RINGBUFFER_H__

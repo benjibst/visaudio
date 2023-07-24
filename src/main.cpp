@@ -5,76 +5,75 @@
 #include "dft.hpp"
 #include "ringbuffer.hpp"
 
+#define HEIGHT 500
+
 RingBuffer buf;
 int memchanged = 0;
 unsigned int channels;
 unsigned int samplesize;
 std::mutex lock;
+unsigned int frameslast = 0;
 
 void stream_callback(void *bufferData, unsigned int frames)
 {
+    if(frames!=frameslast)
+        printf("%u frames\n",frames);
+    frameslast = frames;
     lock.lock();
     memchanged = 1;
-    ringbuffer_push_back(&buf,bufferData,frames,channels);
+    ringbuffer_push_back(&buf,(float*)bufferData,frames,channels);
     lock.unlock();
 }
 
 
 int main(int argc,char** argv)
 {
+    SetTraceLogLevel(LOG_WARNING);
     InitAudioDevice();
-    Music alot = LoadMusicStream(argv[1]);
-    channels = alot.stream.channels;
-    samplesize = alot.stream.sampleSize;
-    allocate_ringbuffer(&buf,alot.stream.sampleRate/60,samplesize);
-    uint16_t* buflocal = (uint16_t*)malloc(buf.sz_total);
+    if(argc<2)
+    {
+        fprintf(stderr,"Provide input file");
+        return 1;
+    }
+    printf("Loading audio file: %s \n",argv[1]);
+    Music music = LoadMusicStream(argv[1]);
+    channels = music.stream.channels;
+    samplesize = music.stream.sampleSize;
+    allocate_ringbuffer(&buf,480);
+    float* buflocal = (float*)malloc(buf.n_elements*sizeof(float));
     float* dft_re = (float*)malloc(buf.n_elements*sizeof(float));
-    float* dft_im = dft_re+buf.n_elements*sizeof(float)/2;
+    float* dft_im = (float*)malloc(buf.n_elements*sizeof(float));
     float* mags = (float*)malloc(buf.n_elements/2*sizeof(float));
-    assert(buflocal!=0);
-    assert(dft_re!=0);
-    assert(mags!=0);
-    
-    AttachAudioStreamProcessor(alot.stream,stream_callback);
-    PlayMusicStream(alot);
-    InitWindow(500,400,"visaudio");
+    AttachAudioStreamProcessor(music.stream,stream_callback);
+    PlayMusicStream(music);
+    InitWindow(buf.n_elements,500,"visaudio");
     int monitor = GetCurrentMonitor();
-    int windowsizey = 500;
-    SetWindowSize(buf.n_elements,windowsizey);
+    SetWindowSize(buf.n_elements,HEIGHT);
     SetTargetFPS(60);
     while(!WindowShouldClose())
     {
-        UpdateMusicStream(alot);
+        UpdateMusicStream(music);
         ClearBackground(GRAY);    
         lock.lock();
         if(memchanged)
         {
-            memcpy(buflocal,buf.base,buf.sz_total);
+            memcpy(buflocal,buf.base,buf.size_bytes);
             memchanged = 0;
         }
         lock.unlock();
-        
         dft(dft_re,dft_im,buflocal,buf.n_elements);
         float maxmag;
         mag(dft_re,dft_im,mags,buf.n_elements/2,&maxmag);
         BeginDrawing();
         for(size_t i=0;i<buf.n_elements/2;i++)
         {
-            int height = (int)(mags[i]/maxmag*windowsizey/2);
-            if(height>0)
-            {
-                DrawRectangle(i*4,windowsizey/2,2,height,BLACK);
-            }
-            if(height>0)
-            {
-                DrawRectangle(i*4,windowsizey/2-height,2,height,BLACK);
-            }
+            int height = (int)(mags[i]/maxmag*HEIGHT);
+            DrawRectangle(i*2,HEIGHT-height,2,height,BLACK);
         }
         EndDrawing();
     }
-    printf("bye\n");
     free(buf.base);
-    UnloadMusicStream(alot);
+    UnloadMusicStream(music);
     CloseAudioDevice();
     free(buflocal);
     free(dft_re);
