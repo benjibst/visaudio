@@ -20,7 +20,7 @@ void mag(cplx* dft,float* mag,size_t n)
 {
     for(size_t i=0;i<n;i++)
     {
-        mag[i]=sqrtf(dft[i]._Val[0]*dft[i]._Val[0]+dft[i]._Val[1]*dft[i]._Val[1]);
+        mag[i]=std::abs(dft[i]);
     }
 }
  
