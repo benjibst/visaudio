@@ -2,12 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 
 set(PROJECT_NAME visaudio)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-
 project(${PROJECT_NAME})
-
 
 set(SOURCE_FILES src/ringbuffer.cpp src/dft.cpp src/main.cpp)
 add_executable(visaudio ${SOURCE_FILES})
+set_property(TARGET visaudio PROPERTY C_STANDARD 11)
 if(WIN32)
   target_include_directories(visaudio PUBLIC "B:/Git-repos/raylib/include")
   target_link_directories(visaudio PUBLIC "B:/Git-repos/raylib/lib")
