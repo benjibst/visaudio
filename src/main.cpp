@@ -29,6 +29,14 @@ void stream_callback(void *bufferData, unsigned int frames)
     lock.unlock();
 }
 
+int GetNumKeyPressed()
+{
+    int key = GetKeyPressed();
+    if(key<48||key>57)
+        return -1;
+    return key-KEY_ZERO;
+}
+
 
 int main(int argc,char** argv)
 {
@@ -44,6 +52,7 @@ int main(int argc,char** argv)
     }
     printf("Loading audio file: %s \n",argv[1]);
     Music music = LoadMusicStream(argv[1]);
+    float musiclength = GetMusicTimeLength(music);
     music.looping=false;
     for (size_t i = 0; i < NOTES; i++)
     {
@@ -59,13 +68,17 @@ int main(int argc,char** argv)
     AttachAudioStreamProcessor(music.stream,stream_callback);
     PlayMusicStream(music);
     InitWindow(buf.n_elements,WINDOW_HEIGHT,"visaudio");
-    int monitor = GetCurrentMonitor();
     SetWindowSize((NOTES-1)*RECT_W,HEIGHT);
     SetTargetFPS(60);
     float maxmaglast = 1;
     float maxmag=0;
+    int key;
     while(!WindowShouldClose())
     {
+        if((key=GetNumKeyPressed())!=-1)
+        {
+            SeekMusicStream(music,key*musiclength/10.0f);
+        }
         UpdateMusicStream(music);
         ClearBackground(GRAY);    
         lock.lock();

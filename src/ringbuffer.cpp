@@ -14,11 +14,10 @@ int allocate_ringbuffer(RingBuffer* buf,size_t n_elements)
 
 void ringbuffer_push_back(RingBuffer* buf, float* data,size_t n_elements,size_t interleaved)
 {
-    size_t beforeof = buf->end-buf->curr;
     size_t cnt = 0;
     while (n_elements-->0)
     {
-        *(buf->curr) = data[cnt++];
+        *(buf->curr) = data[cnt++*interleaved];
         buf->curr++;
         buf->curr -= buf->n_elements*(buf->curr==buf->end);
     }
