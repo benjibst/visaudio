@@ -4,11 +4,9 @@
 #include <stdint.h>
 #include "dft.hpp"
 #include "ringbuffer.hpp"
-
+        
 #define HEIGHT 500
 #define RINGBUF_SIZE 2048
-#define NOTES 12
-#define RECT_W 50
 #define WINDOW_HEIGHT 500
 
 RingBuffer buf;
@@ -17,6 +15,10 @@ unsigned int channels;
 unsigned int samplesize;
 std::mutex lock;
 unsigned int frameslast = 0;
+float notes[] = {0,80,120,180,240,320,520,820,1100,1350,1600,2100,2600,3200,3600,4000,4600,5200,5750,6500,8000,11000,20000};
+#define NOTES (sizeof(notes)/sizeof(float))
+#define RECT_W (700/NOTES)
+
 
 void stream_callback(void *bufferData, unsigned int frames)
 {
@@ -40,7 +42,6 @@ int GetNumKeyPressed()
 
 int main(int argc,char** argv)
 {
-    float notes[NOTES] = {0,140,320,520,820,1350,2100,3200,5200,8000,11000,20000};
     size_t indices[NOTES];
     float notelevelavg[NOTES-1];
     SetTraceLogLevel(LOG_WARNING);

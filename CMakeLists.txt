@@ -17,7 +17,6 @@ endif()
 
 if(MSVC)
     target_compile_options(visaudio PRIVATE /W4 /WX)
-    add_definitions(-)
 else()
     target_compile_options(visaudio PRIVATE -Wall -Wextra -Wpedantic -Werror) #and treat all warnings as errors 
 endif()
