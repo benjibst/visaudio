@@ -15,6 +15,8 @@ unsigned int channels;
 unsigned int samplesize;
 std::mutex lock;
 unsigned int frameslast = 0;
+void* buffer_g;
+unsigned int frames_g;
 float notes[] = {0,80,120,180,240,320,520,820,1100,1350,1600,2100,2600,3200,3600,4000,4600,5200,5750,6500,8000,11000,20000};
 #define NOTES (sizeof(notes)/sizeof(float))
 #define RECT_W (700/NOTES)
@@ -27,7 +29,8 @@ void stream_callback(void *bufferData, unsigned int frames)
     frameslast = frames;
     lock.lock();
     memchanged = 1;
-    ringbuffer_push_back(&buf,(float*)bufferData,frames,channels);
+    buffer_g = bufferData;
+    frames_g = frames;
     lock.unlock();
 }
 
@@ -63,7 +66,6 @@ int main(int argc,char** argv)
     channels = music.stream.channels;
     samplesize = music.stream.sampleSize;
     allocate_ringbuffer(&buf,RINGBUF_SIZE);
-    float* buflocal = (float*)malloc(buf.n_elements*sizeof(float));
     cplx* fftres = (cplx*)malloc(sizeof(cplx)*buf.n_elements);
     float* mags = (float*)malloc(buf.n_elements/2*sizeof(float));
     AttachAudioStreamProcessor(music.stream,stream_callback);
@@ -85,12 +87,12 @@ int main(int argc,char** argv)
         lock.lock();
         if(memchanged)
         {
-            memcpy(buflocal,buf.base,buf.size_bytes);
+            ringbuffer_push_back(&buf,(float*)buffer_g,frames_g,channels);
             memchanged = 0;
         }
         lock.unlock();
         memset(notelevelavg,0,(NOTES-1)*sizeof(float));
-        fft(buflocal,1,fftres,buf.n_elements);
+        fft(buf.base,1,fftres,buf.n_elements);
         mag(fftres,mags,buf.n_elements/2);
         int indexcnt = 0;
         for (size_t i = indices[0]; i < indices[NOTES-1]; i++)
@@ -119,7 +121,6 @@ int main(int argc,char** argv)
     free(buf.base);
     UnloadMusicStream(music);
     CloseAudioDevice();
-    free(buflocal);
     free(fftres);
     free(mags);
     CloseWindow();
