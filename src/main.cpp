@@ -125,7 +125,7 @@ int main(int argc, char **argv)
             height = (height<WINDOW_HEIGHT)*height + (height>WINDOW_HEIGHT)*WINDOW_HEIGHT;
             heightrel = (height/(float)WINDOW_HEIGHT)*0.8f;
             c.r = (unsigned char)(255*(heightrel));
-            c.g = (unsigned char)(255*(1-heightrel));
+            c.g = (unsigned char)(200*(1-heightrel));
             DrawRectangle((int)i * RECT_W, WINDOW_HEIGHT - height, RECT_W, height, c);
         }
         DrawCircleLines(WINDOW_WIDTH-100,100,70,BLUE);
