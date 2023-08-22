@@ -5,10 +5,9 @@
 #include "dft.hpp"
 #include "ringbuffer.hpp"
 
-#define HEIGHT 500
-#define WIDTH 700
 #define RINGBUF_SIZE 2048
 #define WINDOW_HEIGHT 500
+#define WINDOW_WIDTH 700
 
 RingBuffer buf;
 int memchanged = 0;
@@ -20,7 +19,7 @@ void *buffer_g;
 unsigned int frames_g;
 float notes[] = {0, 80, 120, 180, 240, 320, 520, 820, 1100, 1350, 1600, 2100, 2600, 3200, 3600, 4000, 4600, 5200, 5750, 6500, 8000, 11000, 20000};
 #define NOTES (sizeof(notes) / sizeof(float))
-#define RECT_W (WIDTH / NOTES)
+#define RECT_W (WINDOW_WIDTH / (NOTES-1))
 
 void stream_callback(void *bufferData, unsigned int frames)
 {
@@ -70,14 +69,17 @@ int main(int argc, char **argv)
     AttachAudioStreamProcessor(music.stream, stream_callback);
     PlayMusicStream(music);
     InitWindow((int)buf.n_elements, WINDOW_HEIGHT, "visaudio");
-    SetWindowSize((NOTES - 1) * RECT_W, HEIGHT);
+    SetWindowSize((NOTES - 1) * RECT_W, WINDOW_HEIGHT);
     SetTargetFPS(60);
-    float maxmaglast = 1;
+    float maxmagalltime = 0;
     float maxmag = 0;
     size_t maxmagidx = 0;
     float maxmagrelpos = 0;
     int key;
     int indexcnt;
+    int height;
+    float heightrel;
+    Color c = {0,0,0,255};
     while (!WindowShouldClose())
     {
         if ((key = GetNumKeyPressed()) != -1)
@@ -105,6 +107,8 @@ int main(int argc, char **argv)
             if (mags[i] > notelevelmax[indexcnt])
             {
                 notelevelmax[indexcnt] = mags[i];
+                if(mags[i]>maxmagalltime)
+                    maxmagalltime = mags[i];
                 if (mags[i] > maxmag)
                 {
                     maxmag = mags[i];
@@ -117,13 +121,16 @@ int main(int argc, char **argv)
         BeginDrawing();
         for (size_t i = 0; i < NOTES - 1; i++)
         {
-            int height = (int)(notelevelmax[i] / maxmaglast * HEIGHT);
-            DrawRectangle((int)i * RECT_W, HEIGHT - height, RECT_W, height, BLACK);
+            height = (int)(notelevelmax[i] / maxmagalltime * WINDOW_HEIGHT);
+            height = (height<WINDOW_HEIGHT)*height + (height>WINDOW_HEIGHT)*WINDOW_HEIGHT;
+            heightrel = (height/(float)WINDOW_HEIGHT)*0.8f;
+            c.r = (unsigned char)(255*(heightrel));
+            c.g = (unsigned char)(255*(1-heightrel));
+            DrawRectangle((int)i * RECT_W, WINDOW_HEIGHT - height, RECT_W, height, c);
         }
-        DrawCircleLines(WIDTH-100,100,70,BLUE);
-        DrawLine(WIDTH-100,100,(int)(WIDTH-100+cosf(maxmagrelpos*2*PI)*70),(int)(100+sinf(maxmagrelpos*2*PI)*70),RED);
+        DrawCircleLines(WINDOW_WIDTH-100,100,70,BLUE);
+        DrawLine(WINDOW_WIDTH-100,100,(int)(WINDOW_WIDTH-100+cosf(maxmagrelpos*2*PI)*70),(int)(100+sinf(maxmagrelpos*2*PI)*70),RED);
         EndDrawing();
-        maxmaglast = maxmag;
     }
     StopMusicStream(music);
     DetachAudioStreamProcessor(music.stream, stream_callback);
