@@ -70,7 +70,7 @@ int main(int argc,char** argv)
     float* mags = (float*)malloc(buf.n_elements/2*sizeof(float));
     AttachAudioStreamProcessor(music.stream,stream_callback);
     PlayMusicStream(music);
-    InitWindow(buf.n_elements,WINDOW_HEIGHT,"visaudio");
+    InitWindow((int)buf.n_elements,WINDOW_HEIGHT,"visaudio");
     SetWindowSize((NOTES-1)*RECT_W,HEIGHT);
     SetTargetFPS(60);
     float maxmaglast = 1;
@@ -111,7 +111,7 @@ int main(int argc,char** argv)
         for(size_t i=0;i<NOTES-1;i++)
         {
             int height = (int)(notelevelavg[i]/maxmaglast*HEIGHT);
-            DrawRectangle(i*RECT_W,HEIGHT-height,RECT_W,height,BLACK);
+            DrawRectangle((int)i*RECT_W,HEIGHT-height,RECT_W,height,BLACK);
         }
         EndDrawing();
         maxmaglast = maxmag;

@@ -1,12 +1,19 @@
 {
     "configurations": [
         {
-            "name": "visaudio",
+            "name": "visaudio-windows",
             "includePath": [
-                "B:\\Git-repos\\raylib\\include"
+                "C:\\dev\\raylib\\build\\raylib\\include"
             ],
             "intelliSenseMode": "windows-msvc-x64",
             "compilerPath": "B:\\Programme\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\bin\\Hostx86\\x86\\cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "visaudio-linux",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "c++17"
         }
